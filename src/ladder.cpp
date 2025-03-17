@@ -92,4 +92,36 @@ void print_word_ladder(const vector<string>& ladder) {
     }
 }
 
-void verify_word_ladder() {}
+void verify_word_ladder() {
+    set<string> word_list;
+    load_words(word_list, "words.txt");
+    
+    struct TestCase {
+        string start;
+        string end;
+        int expected_length;
+    };
+    
+    vector<TestCase> test_cases = {
+        {"cat", "dog", 4},
+        {"marty", "curls", 6},
+        {"code", "data", 6},
+        {"work", "play", 6},
+        {"sleep", "awake", 8},
+        {"car", "cheat", 4}
+    };
+    
+    for (const auto& test : test_cases) {
+        vector<string> ladder = generate_word_ladder(test.start, test.end, word_list);
+        
+        cout << "Test: " << test.start << " → " << test.end << ": ";
+        if (ladder.size() == test.expected_length)
+            cout << "PASSED" << endl;
+        else
+            cout << "FAILED (expected length " << test.expected_length << ", got " << ladder.size() << ")" << endl;
+        
+        if (!ladder.empty())
+            print_word_ladder(ladder);
+        cout << "--------------------------" << endl;
+    }
+}
