@@ -1,70 +1,45 @@
 #include "dijkstras.h"
 
-vector<int> dijkstra_shortest_path(const Graph& G, int source, vector<int>& previous) {
-    int n = G.numVertices;
-    vector<int> distances(n, INF);
-    previous.resize(n, -1);
-    vector<bool> visited(n, false);
-    distances[source] = 0;
-    
-    struct CompareNode {
-        bool operator()(const pair<int, int>& a, const pair<int, int>& b) {
-            return a.second > b.second;
-        }
-    };
-    priority_queue<pair<int, int>, vector<pair<int, int>>, CompareNode> pq;
-    pq.push({source, 0});
-    
-    while (!pq.empty()) {
-        auto [current, dist] = pq.top();
-        pq.pop();
+vector<int> dijkstra_shortest_path(const Graph & G, int source, vector<int>& previous)
+{
+	int numVerts = G.size();
+    vector<int> dists(numVerts, INF);
+    vector<bool> visited(numVerts, false);
+    auto comparator = [](const pair<int, int>& a, const pair<int, int>& b) {return a.second > b.second;};
+    priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(comparator)> mh(comparator);
+    dists[source] = 0;
+    previous[source] = -1;
 
-        if (visited[current])
+    mh.push({source, 0});
+    while(!mh.empty()) {
+    	int u = mh.top().first;
+        mh.pop();
+        if(visited[u]) 
             continue;
-        
-        visited[current] = true;
-        
-        for (const Edge& edge : G[current]) {
-            int neighbor = edge.dst;
-            int weight = edge.weight;
-            
-            if (!visited[neighbor] && distances[current] != INF && 
-                distances[current] + weight < distances[neighbor]) {
-                distances[neighbor] = distances[current] + weight;
-                previous[neighbor] = current;
-                
-                pq.push({neighbor, distances[neighbor]});
+        visited[u] = true;
+        for(Edge e : G[u]) {
+        	int v = e.dst;
+            int weight = e.weight;
+            if (!visited[v]&&dists[u] + weight < dists[v]) {
+            	dists[v] = dists[u] + weight;
+                previous[v] = u;
+                mh.push({v, dists[v]});
             }
         }
     }
-    return distances;
+    return dists;
 }
-
-vector<int> extract_shortest_path(const vector<int>& distances, const vector<int>& previous, int destination) {
-    vector<int> path;
-    
-    if (distances[destination] == INF)
-        return path;
-    
-    for (int v = destination; v != -1; v = previous[v])
-        path.push_back(v);
-    
+vector<int> extract_shortest_path(const vector<int>& dists, const vector<int>& previous, int destination) {
+	vector<int> path;
+    for (int current = destination; current != -1; current = previous[current])
+    	path.push_back(current);
     reverse(path.begin(), path.end());
     return path;
 }
 
-// Print the path and total cost
-void print_path(const vector<int>& path, int total) {
-    if (path.empty()) {
-        cout << "No path exists." << endl;
-        return;
-    }
-    
-    cout << "Path: ";
-    for (size_t i = 0; i < path.size(); i++) {
-        cout << path[i];
-        if (i < path.size() - 1)
-            cout << " -> ";
-    }
-    cout << ", Total Cost: " << total << endl;
+void print_path(const vector<int>& v, int total) {
+    for (int i = 0; i < v.size(); ++i)
+    	cout << v[i] << " ";
+    cout << endl;
+    cout << "Total cost is " << total << endl;
 }
